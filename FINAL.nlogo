@@ -9,6 +9,13 @@ globals [
   last-five-demand
   cur-mean
   days
+  user-id
+  outer-id
+  inner-id
+  users-to-link
+  out-stations
+  isDone
+  betw
 ]
 ; Model of power network
 ; under attack
@@ -44,6 +51,7 @@ users-own[
   max-demand
   demand
   my-stations
+  id
 
 ]
 
@@ -59,6 +67,49 @@ to setup
   set percent-lockdown []
   set last-five-demand []
   set days 0
+  set user-id 1
+
+  ask users[
+    set id user-id
+    set user-id user-id + 1
+  ]
+
+
+
+  ask users [
+    let c self
+    set outer-id id
+    ask users [
+      set users-to-link []
+      set inner-id id
+     ; output-print outer-id
+     ; output-print inner-id
+     ; print "------"
+      if inner-id != outer-id [
+        if random-float 1 > 0.6 [
+          create-link-with c
+
+      ]
+      ]
+
+
+    ]
+
+
+  ]
+
+
+  ask users [
+    let n  link-neighbors
+    ask n[
+      if breed = users[
+       ; print "MOOOO"
+      ]
+
+    ]
+   ; print "OOOOOOOOOOOOOOOOOOOO"
+  ]
+
   reset-ticks
 
 end
@@ -202,8 +253,11 @@ to go
 
     let m 0
     set m max [level] of my-stations
-
+    let check 0
+    let out-stations1 my-stations
+    let cur-demand demand
     ifelse m > demand and demand > 0[
+      set check 1
       let d demand
       set color yellow
       ask one-of my-stations with [level = m] [
@@ -211,8 +265,35 @@ to go
       ]
 
     ][
+
+
+      set isDone 0
+      ask link-neighbors [
+
+
+        if breed = users and color = yellow and isDone = 0[
+          let m1 0
+          set m1 max [level] of my-stations
+          if m1 > cur-demand [
+            set check 1
+            set isDone 1
+            ask one-of my-stations with [level = m1] [
+              set level level - cur-demand
+            ]
+          ]
+
+
+        ]
+
+    ]
+      if check = 1 [
+      set color yellow]
+    ]
+    if check = 0 [
       set color blue
     ]
+
+
   ]
  ; station logic
   ask distribution-stations [
@@ -499,10 +580,10 @@ PENS
 "pen-2" 1.0 0 -2674135 true "" "plot max [level] of distribution-stations"
 
 PLOT
-761
-231
-966
-386
+718
+634
+1223
+972
 Percent in lockdown
 NIL
 NIL
@@ -560,7 +641,7 @@ stations-capacity
 stations-capacity
 0
 15
-11.5
+15.0
 0.5
 1
 NIL
@@ -575,7 +656,7 @@ generation-adjustment
 generation-adjustment
 0
 50
-48.5
+48.0
 0.5
 1
 NIL
@@ -590,7 +671,7 @@ max-demand-users
 max-demand-users
 0
 1
-0.88
+1.0
 0.01
 1
 NIL
@@ -659,7 +740,7 @@ PLOT
 47
 1698
 197
-plot 1
+Total day demand
 NIL
 NIL
 0.0
@@ -681,6 +762,17 @@ PART 1
 12
 0.0
 1
+
+MONITOR
+128
+715
+272
+760
+NIL
+nw:mean-path-length
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
