@@ -16,6 +16,11 @@ globals [
   out-stations
   isDone
   betw
+  cc
+  mean-betw
+  mean-eigen
+  mean-clos
+
 ]
 ; Model of power network
 ; under attack
@@ -98,17 +103,31 @@ to setup
 
   ]
 
+  ; METRICS CALCULATION HERE
+  ;cc
+  set cc (sum [nw:clustering-coefficient *  (count my-links - 1 ) * count my-links  ] of turtles)/( sum [ count my-links * (count my-links - 1) ] of turtles )
 
-  ask users [
-    let n  link-neighbors
-    ask n[
-      if breed = users[
-       ; print "MOOOO"
-      ]
-
-    ]
-   ; print "OOOOOOOOOOOOOOOOOOOO"
+  ;mean-betw
+  let s 0
+  ask turtles [
+    set s s + nw:betweenness-centrality
   ]
+ set mean-betw s / count turtles
+
+
+  ;mean-eigen
+  set  s 0
+  ask turtles [
+    set s s + nw:eigenvector-centrality
+  ]
+ set mean-eigen s / count turtles
+
+  ;mean-clos
+   set s 0
+  ask turtles [
+    set s s + nw:closeness-centrality
+  ]
+ set mean-clos s / count turtles
 
   reset-ticks
 
@@ -127,6 +146,8 @@ to create-stations
     ]
   ]
 end
+
+
 
 to create-distribution
   ask n-of num-distribution patches [
@@ -197,6 +218,9 @@ end
 to layoutspring
   layout-spring turtles links 0.2 5 1
 end
+
+
+
 
 
 to go
@@ -580,10 +604,10 @@ PENS
 "pen-2" 1.0 0 -2674135 true "" "plot max [level] of distribution-stations"
 
 PLOT
-718
-634
-1223
-972
+933
+244
+1226
+439
 Percent in lockdown
 NIL
 NIL
@@ -770,6 +794,61 @@ MONITOR
 760
 NIL
 nw:mean-path-length
+17
+1
+11
+
+MONITOR
+775
+570
+832
+615
+APL
+nw:mean-path-length
+17
+1
+11
+
+MONITOR
+863
+566
+959
+611
+NIL
+cc
+17
+1
+11
+
+MONITOR
+773
+630
+854
+675
+NIL
+mean-betw
+17
+1
+11
+
+MONITOR
+862
+630
+936
+675
+NIL
+mean-clos
+17
+1
+11
+
+MONITOR
+774
+691
+859
+736
+NIL
+mean-eigen
 17
 1
 11
